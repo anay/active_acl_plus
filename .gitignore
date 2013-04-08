@@ -7,3 +7,6 @@ rdoc
 .loadpath
 .DS_STORE
 nbproject
+
+.idea
+.Gemfile.lock
