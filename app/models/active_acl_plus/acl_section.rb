@@ -1,10 +1,12 @@
 # Groups Acl model objects into different sections to provide better
 # overview in the admin screens. Has no meaning in permission resolution.
-module ActiveAcl
+module ActiveAclPlus
   class AclSection < ActiveRecord::Base
-    set_table_name ActiveAcl::OPTIONS[:acl_sections_table]
-    
-    has_many :members, :class_name => 'ActiveAcl::Acl', :foreign_key => 'section_id'
+    set_table_name ActiveAclPlus.acl_sections_table
+
+    attr_accessible :description, :iname
+
+    has_many :members, :class_name => 'ActiveAclPlus::Acl', :foreign_key => 'section_id'
     
     validates_presence_of :iname
     validates_uniqueness_of :iname

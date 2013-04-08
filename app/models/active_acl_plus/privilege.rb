@@ -1,10 +1,12 @@
 # The basic "privilege" object, like Forum::VIEW might be the privilege to
 # view a forum. Check the README for a detailed description on usage.
-module ActiveAcl
+module ActiveAclPlus
   class Privilege < ActiveRecord::Base
-    set_table_name ActiveAcl::OPTIONS[:privileges_table]
+    set_table_name ActiveAclPlus.privileges_table
+
+    attr_accessible :section, :value, :description
     
-    has_and_belongs_to_many :acls, :uniq => true, :join_table => ActiveAcl::OPTIONS[:acls_privileges_table],:class_name => 'ActiveAcl::Acl'
+    has_and_belongs_to_many :acls, :uniq => true, :join_table => ActiveAclPlus.acls_privileges_table,:class_name => 'ActiveAclPlus::Acl'
     
     validates_presence_of :section, :value
     validates_uniqueness_of :value, :scope => :section

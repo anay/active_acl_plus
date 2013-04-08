@@ -1,6 +1,6 @@
 #require 'direct_handler'
 
-module ActiveAcl #:nodoc:
+module ActiveAclPlus #:nodoc:
   module Acts #:nodoc:
     module AccessObject #:nodoc:
       
@@ -23,27 +23,27 @@ module ActiveAcl #:nodoc:
         # :grouped_by option and comparing it to itself: If it matches, it assumes a belongs_to association. 
         def acts_as_access_object(options = {})
           
-          handler=ObjectHandler.new(self,options) 
+          handler=ObjectHandler.new(self,options)
           
-          ActiveAcl.register_object(self,handler)
+          ActiveAclPlus.register_object(self,handler)
           
-          has_many :requester_links, :as => :requester, :dependent => :delete_all, :class_name => 'ActiveAcl::RequesterLink'
-          has_many :requester_acls, :through => :requester_links, :source => :acl, :class_name => 'ActiveAcl::Acl'
+          has_many :requester_links, :as => :requester, :dependent => :delete_all, :class_name => 'ActiveAclPlus::RequesterLink'
+          has_many :requester_acls, :through => :requester_links, :source => :acl, :class_name => 'ActiveAclPlus::Acl'
           
-          has_many :target_links, :as => :target, :dependent => :delete_all, :class_name => 'ActiveAcl::TargetLink'
-          has_many :target_acls, :through => :target_links, :source => :acl, :class_name => 'ActiveAcl::Acl'
+          has_many :target_links, :as => :target, :dependent => :delete_all, :class_name => 'ActiveAclPlus::TargetLink'
+          has_many :target_acls, :through => :target_links, :source => :acl, :class_name => 'ActiveAclPlus::Acl'
           
           include InstanceMethods
           extend SingletonMethods
-          include ActiveAcl::Acts::Grant
+          include ActiveAclPlus::Acts::Grant
 
-          ActiveAcl::Acl.instance_eval do
-            has_many_polymorphs :requesters, {:from => ActiveAcl.from_access_classes,
-              :through => :"active_acl/requester_links", 
+          ActiveAclPlus::Acl.instance_eval do
+            has_many_polymorphs :requesters, {:from => ActiveAclPlus.from_access_classes,
+              :through => :"active_acl_plus/requester_links",
               :rename_individual_collections => true}
             
-            has_many_polymorphs :targets, {:from => ActiveAcl.from_access_classes,
-              :through => :"active_acl/target_links", 
+            has_many_polymorphs :targets, {:from => ActiveAclPlus.from_access_classes,
+              :through => :"active_acl_plus/target_links",
               :rename_individual_collections => true}
           end
 
@@ -79,12 +79,12 @@ module ActiveAcl #:nodoc:
           # no need to check anything if privilege is not a Privilege
           raise "first Argument has to be a Privilege" unless privilege.is_a?(Privilege)
           # no need to check anything if target is no Access Object
-          raise "target hast to be an AccessObject (#{target.class})" if target and !(target.class.respond_to?(:base_class) && ActiveAcl.is_access_object?(target.class))
+          raise "target hast to be an AccessObject (#{target.class})" if target and !(target.class.respond_to?(:base_class) && ActiveAclPlus.is_access_object?(target.class))
           
           active_acl_handler.has_privilege?(self,privilege,target)
         end
         def active_acl_handler
-          ActiveAcl.object_handler(self.class)
+          ActiveAclPlus.object_handler(self.class)
         end
         #returns a key value store
         def active_acl_instance_cache
@@ -111,4 +111,3 @@ module ActiveAcl #:nodoc:
   end
 end
 
-ActiveRecord::Base.send(:include, ActiveAcl::Acts::AccessObject)

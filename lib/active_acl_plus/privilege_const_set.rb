@@ -12,8 +12,8 @@ class ::Module
       constant_hash.each_pair do |constant_name, description|
         if !const_defined?(constant_name.to_s) || force_reload
           remove_const(constant_name.to_s) if const_defined?(constant_name.to_s)
-          privilege = ActiveAcl::Privilege.find_by_section_and_value(self.name, constant_name.to_s)
-          privilege = ActiveAcl::Privilege.create!(:section => self.name, :value => constant_name.to_s, :description => description) unless privilege
+          privilege = ActiveAclPlus::Privilege.find_by_section_and_value(self.name, constant_name.to_s)
+          privilege = ActiveAclPlus::Privilege.create!(:section => self.name, :value => constant_name.to_s, :description => description) unless privilege
           const_set(constant_name.to_s, privilege)
           result << privilege
         end

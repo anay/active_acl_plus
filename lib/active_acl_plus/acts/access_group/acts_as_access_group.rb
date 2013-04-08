@@ -1,6 +1,6 @@
 require 'active_record'
 
-module ActiveAcl #:nodoc:
+module ActiveAclPlus #:nodoc:
   module Acts #:nodoc:
     module AccessGroup #:nodoc:
       
@@ -12,24 +12,24 @@ module ActiveAcl #:nodoc:
         # Extend self with access group capabilites.
         # Options can be: 
         # type:: is mandatory and is one of the group handler classes 
-        # left_column:: for ActiveAcl::Acts::AccessGroup::NestedSet grouped objects
-        # right_column:: for ActiveAcl::Acts::AccessGroup::NestedSet grouped objects
+        # left_column:: for ActiveAclPlus::Acts::AccessGroup::NestedSet grouped objects
+        # right_column:: for ActiveAclPlus::Acts::AccessGroup::NestedSet grouped objects
         
         def acts_as_access_group(options = {})
-          type=options.delete(:type) || ActiveAcl::Acts::AccessGroup::NestedSet
-          ActiveAcl.register_group(self,type.new(options))
+          type=options.delete(:type) || ActiveAclPlus::Acts::AccessGroup::NestedSet
+          ActiveAclPlus.register_group(self,type.new(options))
 
-          include ActiveAcl::Acts::Grant
+          include ActiveAclPlus::Acts::Grant
           include InstanceMethods
           extend SingletonMethods                         
           
-          ActiveAcl::Acl.instance_eval do
-            has_many_polymorphs :requester_groups, {:from => ActiveAcl.from_group_classes,
-              :through => :"active_acl/requester_group_links",
+          ActiveAclPlus::Acl.instance_eval do
+            has_many_polymorphs :requester_groups, {:from => ActiveAclPlus.from_group_classes,
+              :through => :"active_acl_plus/requester_group_links",
               :rename_individual_collections => true}
             
-            has_many_polymorphs :target_groups, {:from => ActiveAcl.from_group_classes,
-              :through => :"active_acl/target_group_links",
+            has_many_polymorphs :target_groups, {:from => ActiveAclPlus.from_group_classes,
+              :through => :"active_acl_plus/target_group_links",
               :rename_individual_collections => true}
           end
           
@@ -54,4 +54,3 @@ module ActiveAcl #:nodoc:
   end
 end
 
-ActiveRecord::Base.send(:include, ActiveAcl::Acts::AccessGroup)

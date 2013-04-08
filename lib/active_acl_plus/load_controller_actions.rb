@@ -1,8 +1,8 @@
 
-class ActionController::Base
+ActionController::Base.class_eval do
   # Get the access object for the current action.
   def current_action
-    ActiveAcl::CONTROLLERS[self.class.name][action_name]
+    ActiveAclPlus::CONTROLLERS[self.class.name][action_name]
   end 
   
   # alias method_added class method
@@ -10,34 +10,34 @@ class ActionController::Base
     alias :method_added_before_active_acl_controller_action_loading :method_added
   end
   
-  # Overrides method_added, so the needed ActiveAcl::ControllerAction is loaded/created 
+  # Overrides method_added, so the needed ActiveAclPlus::ControllerAction is loaded/created
   # when the action gets added to the controller. 
   def self.method_added(action) #:nodoc:
     method_added_before_active_acl_controller_action_loading(action)
-    ActiveAcl::CONTROLLERS[self.name] ||= {}
+    ActiveAclPlus::CONTROLLERS[self.name] ||= {}
 
     if (public_instance_methods.include?(action.to_s))
       # if no loaded target found
-      unless ActiveAcl::CONTROLLERS[self.name][action.to_s]
+      unless ActiveAclPlus::CONTROLLERS[self.name][action.to_s]
         # load it
         stripped_name = self.name.underscore.gsub(/_controller/, '')
         
         begin
-          target = (ActiveAcl::CONTROLLERS[self.name][action.to_s] ||= ActiveAcl::ControllerAction.find_by_action_and_controller(action.to_s, stripped_name))
+          target = (ActiveAclPlus::CONTROLLERS[self.name][action.to_s] ||= ActiveAclPlus::ControllerAction.find_by_action_and_controller(action.to_s, stripped_name))
           unless target
-            grp_name = stripped_name + ActiveAcl::OPTIONS[:controller_group_name_suffix]
+            grp_name = stripped_name + ActiveAclPlus.controller_group_name_suffix
             
             # find controller group
-            cgroup = ActiveAcl::CONTROLLERS[self.name][:cgroup] ||= ActiveAcl::ControllerGroup.find_by_description(grp_name)
+            cgroup = ActiveAclPlus::CONTROLLERS[self.name][:cgroup] ||= ActiveAclPlus::ControllerGroup.find_by_description(grp_name)
             
             unless cgroup
               #try to get main group
-              main_group ||= (ActiveAcl::CONTROLLERS[ActiveAcl::OPTIONS[:controllers_group_name]] ||= ActiveAcl::ControllerGroup.find_by_description(ActiveAcl::OPTIONS[:controllers_group_name]))
+              main_group ||= (ActiveAclPlus::CONTROLLERS[ActiveAclPlus.controllers_group_name] ||= ActiveAclPlus::ControllerGroup.find_by_description(ActiveAclPlus.controllers_group_name))
            
               unless main_group
                 # create main group
-                base_group = ActiveAcl::ControllerGroup.root
-                main_group = ActiveAcl::ControllerGroup.create(:description => ActiveAcl::OPTIONS[:controllers_group_name])
+                base_group = ActiveAclPlus::ControllerGroup.root
+                main_group = ActiveAclPlus::ControllerGroup.create(:description => ActiveAclPlus.controllers_group_name)
                 # check if better_nested_set functionality is available
                 if main_group.respond_to?(:move_to_child_of)
                   main_group.move_to_child_of base_group
@@ -45,11 +45,11 @@ class ActionController::Base
                   base_group.add_child main_group
                 end
                 
-                ActiveAcl::CONTROLLERS[ActiveAcl::OPTIONS[:controllers_group_name]] = main_group
+                ActiveAclPlus::CONTROLLERS[ActiveAclPlus.controllers_group_name] = main_group
               end
               
               # create controller group
-              cgroup = ActiveAcl::ControllerGroup.create(:description => grp_name)
+              cgroup = ActiveAclPlus::ControllerGroup.create(:description => grp_name)
               
               # check if better_nested_set functionality is available
               if cgroup.respond_to?(:move_to_child_of)
@@ -62,7 +62,7 @@ class ActionController::Base
             target = cgroup.controller_actions.create :action => action.to_s, :controller => stripped_name
 
             # save to collection
-            ActiveAcl::CONTROLLERS[self.name][action.to_s] = target
+            ActiveAclPlus::CONTROLLERS[self.name][action.to_s] = target
 
           end # unless target fetched from db
                   

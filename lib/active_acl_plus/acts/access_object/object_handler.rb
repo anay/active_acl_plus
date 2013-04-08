@@ -1,4 +1,4 @@
-module ActiveAcl #:nodoc:
+module ActiveAclPlus #:nodoc:
   module Acts #:nodoc:
     module AccessObject #:nodoc:
       
@@ -11,7 +11,7 @@ module ActiveAcl #:nodoc:
           @klass = klass
           if options[:grouped_by]
             @group_class_name = options[:grouped_by].to_s.classify
-            @group_handler=ActiveAcl.group_handler(@group_class_name.constantize)
+            @group_handler=ActiveAclPlus.group_handler(@group_class_name.constantize)
             @group_table_name=@group_class_name.constantize.table_name
             @join_table = options[:join_table] || [klass.name.pluralize.underscore.gsub(/\//,'_'), group_class_name.pluralize.underscore.gsub(/\//,'_')].sort.join('_')  
             @foreign_key = options[:foreign_key] || "#{klass.name.demodulize.underscore}_id" 
@@ -83,17 +83,17 @@ module ActiveAcl #:nodoc:
             vars[var[2..-2]] || var
           end
           
-          results = ActiveAcl::OPTIONS[:db].query(sql) #get the query from the db
+          results = ActiveRecord::Base.connection.select_all(sql) #get the query from the db
           value=set_cached(requester,privilege,target,results)
           return value
         end
         #gets the instance cache from the background store or a hash
         def get_instance_cache(requester)
-          cache.get(requester_cache_id(requester)) || {}
+          {}
         end
         #destroy the 2nd level cache
         def delete_cached(requester)
-          cache.delete(requester_cache_id(requester))
+          #cache.delete(requester_cache_id(requester))
         end
         
         attr_reader :query_t_select,:query_t_where
@@ -101,12 +101,12 @@ module ActiveAcl #:nodoc:
         #Things go private from here ----------------
         private
         def cache
-          ActiveAcl::OPTIONS[:cache]
+          @cache ||= {}
         end
         
         #builds a instance_cache key for a query
         def query_id(requester,privilege,target)
-          privilege_id = (privilege.kind_of?(ActiveAcl::Privilege) ? privilege.id : privilege)  
+          privilege_id = (privilege.kind_of?(ActiveAclPlus::Privilege) ? privilege.id : privilege)
           [privilege_id, klass.base_class.name, requester.id, (target ? target.class.base_class.name : ''), (target ? target.id.to_s : '')].join('-')
         end
         
@@ -169,7 +169,7 @@ module ActiveAcl #:nodoc:
           raise "something went realy wrong!" if value.nil?
           
           #cache the whole instance cache
-          cache.set(requester_cache_id(requester),instance_cache,ActiveAcl::OPTIONS[:cache_privilege_timeout])
+          #cache.set(requester_cache_id(requester),instance_cache,ActiveAclPlus.cache_privilege_timeout)
           
           value
         end
@@ -187,17 +187,17 @@ module ActiveAcl #:nodoc:
         attr_reader :query_r_select, :query_r_where_2d, :query_r_where_3d, :order_by_3d,:order_by_2d
         def prepare_requester_sql
           @query_r_select = <<-QUERY
-            SELECT acls.id, acls.allow, privileges.id AS privilege_id FROM #{ActiveAcl::OPTIONS[:acls_table]} acls 
-            LEFT JOIN #{ActiveAcl::OPTIONS[:acls_privileges_table]} acls_privileges ON acls_privileges.acl_id=acls.id 
-            LEFT JOIN #{ActiveAcl::OPTIONS[:privileges_table]} privileges ON privileges.id = acls_privileges.privilege_id
-            LEFT JOIN #{ActiveAcl::OPTIONS[:requester_links_table]} r_links ON r_links.acl_id=acls.id
+            SELECT acls.id, acls.allow, privileges.id AS privilege_id FROM #{ActiveAclPlus.acls_table} acls
+            LEFT JOIN #{ActiveAclPlus.acls_privileges_table} acls_privileges ON acls_privileges.acl_id=acls.id
+            LEFT JOIN #{ActiveAclPlus.privileges_table} privileges ON privileges.id = acls_privileges.privilege_id
+            LEFT JOIN #{ActiveAclPlus.requester_links_table} r_links ON r_links.acl_id=acls.id
             QUERY
           if grouped?
             requester_groups_table = group_class_name.constantize.table_name
             requester_group_type = group_class_name.constantize.name
             
             @query_r_select << "
-            LEFT JOIN #{ActiveAcl::OPTIONS[:requester_group_links_table]} r_g_links ON acls.id = r_g_links.acl_id AND r_g_links.requester_group_type = '#{requester_group_type}'
+            LEFT JOIN #{ActiveAclPlus.requester_group_links_table} r_g_links ON acls.id = r_g_links.acl_id AND r_g_links.requester_group_type = '#{requester_group_type}'
             LEFT JOIN #{requester_groups_table} r_groups ON r_g_links.requester_group_id = r_groups.id
             "
           end
@@ -230,12 +230,12 @@ module ActiveAcl #:nodoc:
         end
         
         def prepare_target_sql
-          @query_t_select = " LEFT JOIN #{ActiveAcl::OPTIONS[:target_links_table]} t_links ON t_links.acl_id=acls.id"
+          @query_t_select = " LEFT JOIN #{ActiveAclPlus.target_links_table} t_links ON t_links.acl_id=acls.id"
           if grouped?
             target_groups_table = @group_class_name.constantize.table_name
             target_group_type = @group_class_name.constantize.name
             
-            @query_t_select << " LEFT JOIN #{ActiveAcl::OPTIONS[:target_group_links_table]} t_g_links ON t_g_links.acl_id=acls.id
+            @query_t_select << " LEFT JOIN #{ActiveAclPlus.target_group_links_table} t_g_links ON t_g_links.acl_id=acls.id
                                 AND t_g_links.target_group_type = '#{target_group_type}'
                                 LEFT JOIN #{target_groups_table} t_groups ON t_groups.id=t_g_links.target_group_id"
           end 

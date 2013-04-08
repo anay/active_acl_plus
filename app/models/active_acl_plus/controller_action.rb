@@ -1,11 +1,11 @@
 # This model is a DB representation of actions on an ActionController::Base
-# controller and is grouped by ActiveAcl::ControllerGroup. 
-class ActiveAcl::ControllerAction < ActiveRecord::Base
-  set_table_name ActiveAcl::OPTIONS[:controller_actions_table]
+# controller and is grouped by ActiveAclPlus::ControllerGroup.
+class ActiveAclPlus::ControllerAction < ActiveRecord::Base
+  set_table_name ActiveAclPlus.controller_actions_table
   privilege_const_set('EXECUTE')
 
-  belongs_to :controller_group, :class_name => 'ActiveAcl::ControllerGroup'
-  acts_as_access_object :grouped_by => :"active_acl/controller_group"
+  belongs_to :controller_group, :class_name => 'ActiveAclPlus::ControllerGroup'
+  acts_as_access_object :grouped_by => :"active_acl_plus/controller_group"
   validates_presence_of :action, :controller, :controller_group
   
   # Returns the instance representation in the admin screens.

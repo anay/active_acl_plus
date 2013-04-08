@@ -9,4 +9,4 @@ rdoc
 nbproject
 
 .idea
-.Gemfile.lock
+Gemfile.lock

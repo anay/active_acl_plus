@@ -1,4 +1,4 @@
-module ActiveAcl
+module ActiveAclPlus
   CONTROLLERS={}
   GROUP_CLASSES={}
   ACCESS_CLASSES={}

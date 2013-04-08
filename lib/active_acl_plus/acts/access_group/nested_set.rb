@@ -1,4 +1,4 @@
-module ActiveAcl
+module ActiveAclPlus
   module Acts #:nodoc:
     module AccessGroup #:nodoc:
       class NestedSet #:nodoc:
@@ -7,8 +7,8 @@ module ActiveAcl
           
           @left_column = options[:left_column] || :lft 
           @right_column = options[:right_column] || :rgt
-          #          :controller => ActiveAcl::OPTIONS[:default_group_selector_controller],
-          #          :action => ActiveAcl::OPTIONS[:default_group_selector_action]}
+          #          :controller => ActiveAclPlus.default_group_selector_controller,
+          #          :action => ActiveAclPlus.default_group_selector_action}
           
         end
         def group_sql(object_handler,target = false)

@@ -1,9 +1,9 @@
-# This model is used for grouping ActiveAcl::ControllerAction models. 
-class ActiveAcl::ControllerGroup < ActiveRecord::Base
-  set_table_name ActiveAcl::OPTIONS[:controller_groups_table]
+# This model is used for grouping ActiveAclPlus::ControllerAction models.
+class ActiveAclPlus::ControllerGroup < ActiveRecord::Base
+  set_table_name ActiveAclPlus.controller_groups_table
   acts_as_nested_set
-  has_many :controller_actions,:class_name => 'ActiveAcl::ControllerAction'
-  acts_as_access_group :type => ActiveAcl::Acts::AccessGroup::NestedSet
+  has_many :controller_actions,:class_name => 'ActiveAclPlus::ControllerAction'
+  acts_as_access_group :type => ActiveAclPlus::Acts::AccessGroup::NestedSet
 
    validates_presence_of :description
    

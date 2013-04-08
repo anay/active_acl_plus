@@ -1,8 +1,8 @@
-module ActiveAcl
+module ActiveAclPlus
   class TargetLink < ActiveRecord::Base
-    set_table_name ActiveAcl::OPTIONS[:target_links_table]
+    set_table_name ActiveAclPlus.target_links_table
     
-    belongs_to :acl, :class_name => "ActiveAcl::Acl"
+    belongs_to :acl, :class_name => "ActiveAclPlus::Acl"
     belongs_to :target, :polymorphic => true
     
     def self.reloadable? #:nodoc:

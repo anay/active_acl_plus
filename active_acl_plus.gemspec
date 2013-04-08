@@ -1,31 +1,24 @@
-# -*- encoding: utf-8 -*-
+$:.push File.expand_path("../lib", __FILE__)
 
+# Maintain your gem's version:
+require "active_acl_plus/version"
+
+# Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-  s.name = %q{active_acl_plus}
-  s.version = "0.4.6"
+  s.name        = "active_acl_plus"
+  s.version     = ActiveAclPlus::VERSION
+  s.authors     = ["Peter Schrammel", "Gregor Melhorn"]
+  s.email       = ["peter.schrammel@gmx.de"]
+  s.homepage    = "http://activeaclplus.rubyforge.org/"
+  s.summary     = "A new Version of ActiveAclPlus is available."
+  s.description = "A flexible, fast and easy to use generic access control system."
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Peter Schrammel", "Gregor Melhorn"]
-  s.date = %q{2009-03-31}
-  s.description = %q{A flexible, fast and easy to use generic access control system.}
-  s.email = ["peter.schrammel@gmx.de"]
-  s.extra_rdoc_files = ["README.rdoc", "LICENSE", "CHANGELOG"]
-  s.files = ["README.rdoc", "VERSION.yml", "lib/active_acl", "lib/active_acl/db", "lib/active_acl/db/mysql_adapter.rb", "lib/active_acl/db/active_record_adapter.rb", "lib/active_acl/cache", "lib/active_acl/cache/no_cache_adapter.rb", "lib/active_acl/cache/memcache_adapter.rb", "lib/active_acl/handler", "lib/active_acl/handler/object_handler.rb", "lib/active_acl/handler/nested_set.rb", "lib/active_acl/load_files_from.rb", "lib/active_acl/options.rb", "lib/active_acl/load_controller_actions.rb", "lib/active_acl/privilege_const_set.rb", "lib/active_acl/acts_as_access_group.rb", "lib/active_acl/grant.rb", "lib/active_acl/base.rb", "lib/active_acl/acts_as_access_object.rb", "lib/active_acl.rb", "app/models", "app/models/active_acl", "app/models/active_acl/acl_section.rb", "app/models/active_acl/controller_group.rb", "app/models/active_acl/privilege.rb", "app/models/active_acl/requester_group_link.rb", "app/models/active_acl/requester_link.rb", "app/models/active_acl/target_group_link.rb", "app/models/active_acl/target_link.rb", "app/models/active_acl/controller_action.rb", "app/models/active_acl/acl.rb", "db/migrate", "db/migrate/001_base_table_setup.rb", "LICENSE", "CHANGELOG"]
-  s.has_rdoc = true
-  s.homepage = %q{http://activeaclplus.rubyforge.org/}
-  s.rdoc_options = ["--title", "Active Acl Plus", "--main", "README.rdoc", "--inline-source", "--charset=UTF-8"]
-  s.require_paths = ["lib"]
-  s.rubyforge_project = %q{activeaclplus}
-  s.rubygems_version = %q{1.3.1}
-  s.summary = %q{A new Version of ActiveAclPlus is available.}
+  s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.rdoc"]
+  s.test_files = Dir["test/**/*"]
 
-  if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
-    s.specification_version = 2
+  s.add_dependency "has_many_polymorphs"
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-    else
-    end
-  else
-  end
+  s.add_dependency "rails", "~> 3.2.13"
+
+  s.add_development_dependency "sqlite3"
 end

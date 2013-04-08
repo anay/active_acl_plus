@@ -8,18 +8,21 @@
 # requester_groups
 # target_groups
 
-module ActiveAcl
+module ActiveAclPlus
   class Acl < ActiveRecord::Base
-    set_table_name ActiveAcl::OPTIONS[:acls_table]
-    
-    belongs_to :section, :class_name => 'ActiveAcl::AclSection', :foreign_key => 'section_id'
-    has_and_belongs_to_many :privileges, :uniq => true, :join_table => ActiveAcl::OPTIONS[:acls_privileges_table], :class_name => 'ActiveAcl::Privilege'
-    
-    has_many :target_links, :dependent => :delete_all, :class_name => 'ActiveAcl::TargetLink'
-    has_many :requester_links, :dependent => :delete_all,:class_name => 'ActiveAcl::RequesterLink'
+    set_table_name ActiveAclPlus.acls_table
 
-    has_many :requester_group_links, :dependent => :delete_all,:class_name => 'ActiveAcl::RequesterGroupLink'
-    has_many :target_group_links, :dependent => :delete_all,:class_name => 'ActiveAcl::TargetGroupLink'
+    attr_accessible :section, :iname
+
+
+    belongs_to :section, :class_name => 'ActiveAclPlus::AclSection', :foreign_key => 'section_id'
+    has_and_belongs_to_many :privileges, :uniq => true, :join_table => ActiveAclPlus.acls_privileges_table, :class_name => 'ActiveAclPlus::Privilege'
+    
+    has_many :target_links, :dependent => :delete_all, :class_name => 'ActiveAclPlus::TargetLink'
+    has_many :requester_links, :dependent => :delete_all,:class_name => 'ActiveAclPlus::RequesterLink'
+
+    has_many :requester_group_links, :dependent => :delete_all,:class_name => 'ActiveAclPlus::RequesterGroupLink'
+    has_many :target_group_links, :dependent => :delete_all,:class_name => 'ActiveAclPlus::TargetGroupLink'
 
     validates_uniqueness_of :iname
     validates_presence_of :iname
