@@ -1,3 +1,11 @@
+=Active Access Control Lists Plus (ActiveAclPlus) Rails 3.2 Port
+This is my attempt to port this gem to Rails 3.2. I have currently tested it to support my needs and would continue to improve it further.
+
+My Blog: {Anay Kamat's Weblog}[http://www.anaykamat.com]
+My Company: {PresentSoft Technologies Pvt. Ltd.}[http://www.presentsoft.co.in]
+
+Soon, I would update the documentation with steps to install and configure the gem.
+
 =Active Access Control Lists Plus (ActiveAclPlus)
 The ActiveAclPlus plugin implements a flexible, fast and easy to use generic access control system.
 
