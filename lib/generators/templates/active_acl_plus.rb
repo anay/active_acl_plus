@@ -1,3 +1,5 @@
+require 'active_acl_plus'
+
 ActiveAclPlus.setup do |config|
 
 
