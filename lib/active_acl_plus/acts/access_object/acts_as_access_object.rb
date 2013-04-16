@@ -8,7 +8,12 @@ module ActiveAclPlus #:nodoc:
         base.extend(ClassMethods)
       end
       
-      module ClassMethods 
+      module ClassMethods
+
+        def accessible_by(user, privilege)
+          handler = ActiveAclPlus.object_handler(user.class)
+          handler.accessible_by(self,user, privilege)
+        end
         
         # Extend self with access object capabilites. See README for details
         # on usage. Accepts the following options as a hash:

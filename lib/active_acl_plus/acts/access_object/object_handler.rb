@@ -36,6 +36,45 @@ module ActiveAclPlus #:nodoc:
         def klass_name 
           klass.base_class.name
         end
+
+        def accessible_by(target,user, privilege)
+
+          requester_group_class = group_class_name._as_class
+          max_length_of_requester_group_rgt_value = requester_group_class.root.rgt.to_s.length
+
+          target_handler = ActiveAclPlus.object_handler(target)
+          target_group_class = target_handler.group_class_name._as_class
+          max_length_of_target_group_rgt_value = target_group_class.root.rgt.to_s.length
+
+
+          requester_sql_details = prepare_accessible_requester_sql target_group_class, requester_group_class, target, user.class, user
+          target_sql_details = prepare_accessible_target_sql target, target_group_class, target_handler
+
+          vars={'requester_id' => user.id}
+          vars['requester_group_id'] = user.send(association_foreign_key) if !self.habtm? && self.grouped?
+          #vars['target_group_id'] = target.send(t_handler.association_foreign_key) unless t_handler.habtm?
+          sql = ''
+          sql << requester_sql_details[:select]
+
+
+          sql << target_sql_details[:select]
+          sql << "\n WHERE "
+          sql << requester_sql_details[:where]
+          sql << target_sql_details[:where]
+
+          vars['privilege_id'] = privilege.id
+          vars['target_type'] = target.name
+
+          #replacing the vars in the SQL
+          sql=sql.gsub(/%\{[^\}]+\}/) do |var|
+            vars[var[2..-2]] || var
+          end
+
+          results = ActiveRecord::Base.connection.select_all(sql) #get the query from the db
+          #value=set_cached(requester,privilege,target,results)
+          return results
+        end
+
         
         #checks the privilege of a requester on a target (optional)
         def has_privilege?(requester,privilege,target=nil)
@@ -247,6 +286,63 @@ module ActiveAclPlus #:nodoc:
             @query_t_where << ")"
           end
         end
+
+
+        ##########################
+
+        def prepare_accessible_requester_sql target_group_class, requester_group_class, target_class, requester_class, requester
+          accessible_query_r_select = ""
+          accessible_query_r_select = <<-QUERY
+            SELECT  the_target.id as v1, (CASE WHEN r_g_links.acl_id IS NULL THEN 0 ELSE 1 END) as v2,(CASE WHEN (r_groups.rgt - r_groups.lft) IS NULL THEN 0 ELSE (r_groups.rgt - r_groups.lft) END) as v3,(CASE WHEN t_g_links.acl_id IS NULL THEN 0 ELSE 1 END) as v4,(CASE WHEN (t_groups.rgt - t_groups.lft) IS NULL THEN 0 ELSE (t_groups.rgt - t_groups.lft) END) as v5, acls.allow, the_target.id FROM #{ActiveAclPlus.acls_table} acls
+            LEFT JOIN #{ActiveAclPlus.acls_privileges_table} acls_privileges ON acls_privileges.acl_id=acls.id
+            LEFT JOIN #{ActiveAclPlus.privileges_table} privileges ON privileges.id = acls_privileges.privilege_id
+            LEFT JOIN #{ActiveAclPlus.requester_links_table} r_links ON r_links.acl_id=acls.id
+          QUERY
+
+          requester_groups_table = requester_group_class.table_name
+          requester_group_type = requester_group_class.name
+
+          accessible_query_r_select << "
+          LEFT JOIN #{ActiveAclPlus.requester_group_links_table} r_g_links ON acls.id = r_g_links.acl_id AND r_g_links.requester_group_type = '#{requester_group_type}'
+          LEFT JOIN #{requester_groups_table} r_groups ON r_g_links.requester_group_id = r_groups.id
+          "
+
+          accessible_query_r_where_3d = "acls.enabled = #{klass.connection.quote(true)} AND (privileges.id = %{privilege_id}) "
+          query = " AND ((r_links.requester_id=%{requester_id}
+          AND r_links.requester_type='#{klass.base_class.name}')"
+
+
+          query << " OR (r_g_links.requester_group_id IN #{group_handler.group_sql(self)})) "
+
+          accessible_query_r_where_3d << query
+
+          {
+              :select => accessible_query_r_select,
+              :where => accessible_query_r_where_3d
+          }
+
+        end
+
+
+        def prepare_accessible_target_sql target_class, target_group_class, target_handler
+          accessibe_query_t_select = " LEFT JOIN #{ActiveAclPlus.target_links_table} t_links ON t_links.acl_id=acls.id"
+          target_groups_table = target_group_class.table_name
+          target_group_type = target_group_class.name
+
+          accessibe_query_t_select << " LEFT JOIN #{ActiveAclPlus.target_group_links_table} t_g_links ON t_g_links.acl_id=acls.id
+                                AND t_g_links.target_group_type = '#{target_group_type}'
+                                LEFT JOIN #{target_class.table_name} the_target ON the_target.id = t_links.target_id OR t_g_links.target_group_id=the_target.category_id
+                                LEFT JOIN #{target_groups_table} t_groups ON t_groups.id=t_g_links.target_group_id"
+          accessibe_query_t_where = " AND ((t_links.target_type = '%{target_type}' )"
+          accessibe_query_t_where << " OR t_g_links.target_group_id IN #{target_handler.group_handler.accessible_group_sql(target_handler,true)})"
+
+          {
+              :select => accessibe_query_t_select,
+              :where => accessibe_query_t_where
+          }
+        end
+
+
       end
     end
   end
