@@ -91,9 +91,7 @@ module ActiveAclPlus #:nodoc:
 
           valid_id_query = "select valid_id from (select the_left.id valid_id, the_left.allow, the_right.id from (#{sort_field_unified_query}) as the_left left join (select id, min(sort_order) min_sort_order from (#{sort_field_unified_query})as y group by(id)) as the_right on the_left.id=the_right.id and the_left.sort_order = the_right.min_sort_order where the_right.id>0 and the_left.allow = 't') as valids"
 
-          results = ActiveRecord::Base.connection.select_all(valid_id_query) #get the query from the db
-          #value=set_cached(requester,privilege,target,results)
-          return results
+          target.where("(#{target.quoted_table_name}.#{target.quoted_primary_key} IN (#{valid_id_query}))")
         end
 
         
