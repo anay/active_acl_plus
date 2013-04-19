@@ -10,7 +10,7 @@ module ActiveAclPlus #:nodoc:
       
       module ClassMethods
 
-        def accessible_by(user, privilege)
+        def objects_accessible_by(user, privilege)
           handler = ActiveAclPlus.object_handler(user.class)
           handler.accessible_by(self,user, privilege)
         end
