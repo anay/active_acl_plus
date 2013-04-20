@@ -350,7 +350,7 @@ module ActiveAclPlus #:nodoc:
 
           accessibe_query_t_select << " LEFT JOIN #{ActiveAclPlus.target_group_links_table} t_g_links ON t_g_links.acl_id=acls.id
                                 AND t_g_links.target_group_type = '#{target_group_type}'
-                                LEFT JOIN #{target_class.table_name} the_target ON the_target.id = t_links.target_id OR t_g_links.target_group_id=the_target.#{target_handler.association_foreign_key}
+                                LEFT JOIN #{target_class.table_name} the_target ON the_target.id = t_links.target_id OR t_g_links.target_group_id IN #{target_handler.group_handler.accessible_group_sql(target_handler,true)}
                                 LEFT JOIN #{target_groups_table} t_groups ON t_groups.id=t_g_links.target_group_id"
           accessibe_query_t_where = " AND ((t_links.target_type = '%{target_type}' )"
           accessibe_query_t_where << " OR t_g_links.target_group_id IN #{target_handler.group_handler.accessible_group_sql(target_handler,true)})"
