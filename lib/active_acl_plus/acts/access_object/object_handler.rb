@@ -87,7 +87,7 @@ module ActiveAclPlus #:nodoc:
 
 
 
-          sort_field_unified_query = "select (10+v2)*#{v2_multiplier}+(#{v3_normalizer} - v3)*#{v3_multiplier}+(10+v4)*#{v4_multiplier}+(#{v5_normalizer} - v5) sort_order, allow, id  from (#{sql}) as the_query order by id asc, sort_order asc"
+          sort_field_unified_query = "select (10+v2)*CAST(#{v2_multiplier} AS BIGINT)+(CAST(#{v3_normalizer} AS BIGINT) - v3)*CAST(#{v3_multiplier} AS BIGINT)+(10+v4)*CAST(#{v4_multiplier} AS BIGINT)+(CAST(#{v5_normalizer} AS BIGINT) - v5) sort_order, allow, id  from (#{sql}) as the_query order by id asc, sort_order asc"
 
           valid_id_query = "select valid_id from (select the_left.id valid_id, the_left.allow, the_right.id from (#{sort_field_unified_query}) as the_left left join (select id, min(sort_order) min_sort_order from (#{sort_field_unified_query})as y group by(id)) as the_right on the_left.id=the_right.id and the_left.sort_order = the_right.min_sort_order where the_right.id>0 and the_left.allow = 't') as valids"
 
