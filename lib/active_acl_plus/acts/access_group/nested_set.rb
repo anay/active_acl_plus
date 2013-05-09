@@ -39,7 +39,7 @@ module ActiveAclPlus
 
         def order_by(object_handler,target=false)
           target_requester = (target ? 't' : 'r')
-          "#{target_requester}_groups.#{left_column} - #{target_requester}_groups.#{right_column} ASC"
+          "#{target_requester}_groups.#{right_column} - #{target_requester}_groups.#{left_column} ASC"
         end
       end #class
     end
